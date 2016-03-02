@@ -30,8 +30,7 @@ def get_schema(f):
 def head_avro(f, n):
     "will return n lines from avrofile f"
     with DataFileReader(open(f, "r"), DatumReader()) as avrofeed:
-        head = list(islice(avrofeed, n))
-        return head
+        return list(islice(avrofeed, n))
 
 
 def write_avro(f, n, s):
