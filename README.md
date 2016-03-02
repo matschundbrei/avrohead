@@ -11,7 +11,7 @@ You will need to install the lates python bindings for your python version from 
 USAGE
 =====
 
-you call this script with an optional number and a filename and you will get back the number you've put in lines from that avro.
+you call this script with an optional number (-n) and a filename (-f) and you will get back the number you've put in lines from that avro.
 
 You can also redirect the output in another outputfile with the -d switch.
 
