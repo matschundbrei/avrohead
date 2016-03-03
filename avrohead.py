@@ -6,23 +6,12 @@
 
 import os
 import sys
-import getopt
 import json
 import avro.schema
 from itertools import islice
+from optparse import OptionParser
 from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
-
-
-def show_help():
-    "well, this'll show the help, alright!"
-    print "Usage:"
-    print "\tpython {0} -n 4711 -f /path/to/somefile.avro".format(os.path.basename(__file__))
-    print "\nThe -f option has to be present, if you do not give me a number(-n)"
-    print "I will take 5!"
-    print "You can add the -s option to only receive the schema in JSON"
-    print "If you want the JSON to be printed pretty, add the -i switch"
-    print "You can add a '-d /path/to/newfile.avro' to redirect the output to a new avro file"
 
 
 def get_schema(f):
@@ -46,49 +35,35 @@ def write_avro(f, n, s):
             writer.append(line)
 
 
-def main(argv):
+def main():
     "main foo happening here, alright!"
-    avro = None
-    dest = None
-    schema = None
-    pretty = None
-    num = 5
-    try:
-        opts, args = getopt.getopt(argv, 'f:n:d:si')
-    except getopt.GetoptError as err:
-        show_help()
-        sys.exit(2)
-    for o, a in opts:
-        # print "{0} ===> {1}".format(o, a) # DEBUG vars
-        if o == "-f":
-            avro = a
-        elif o == "-d":
-            dest = a
-        elif o == "-n":
-            num = a
-        elif o == "-s":
-            schema = True
-        elif o == "-i":
-            pretty = True
-        else:
-            print "I am going to ignore option {0} you've set to {1}".format(o, a)
+    usage = "%prog [Options]"
+    parser = OptionParser(usage=usage, version="%prog v0.1")
+    parser.add_option("-f", "--file", dest="avro", help="an Avro file to read from", metavar="some/file.avro")
+    parser.add_option("-s", "--schema", dest="schema", default=None, action="store_true",
+                      help="only extract and return the avro-schema in JSON")
+    parser.add_option("-i", "--pretty", dest="pretty", default=None, action="store_true",
+                      help="indent [and keysort, if schema] any JSON on the output")
+    parser.add_option("-n", "--number", dest="num", type="int", default=5, help="integer number of lines to put out")
+    parser.add_option("-d", "--destination", dest="dest", help="optional destination file to write to")
+    (opts, arg) = parser.parse_args()
 
-    if not avro:
+    if not opts.avro:
         print "We at least need a file, ok?"
-        show_help()
+        parser.print_help()
         sys.exit(2)
 
-    if not dest and schema:
-        schema = get_schema(avro)
-        if not pretty:
+    if not opts.dest and opts.schema:
+        schema = get_schema(opts.avro)
+        if not opts.pretty:
             print schema.to_json()
         else:
-            print json.dumps(schema.to_json(), sort_keys=True, indent=pretty)  # I know, it's silly
-    elif not dest and not schema:
-        print json.dumps(head_avro(avro, num), indent=pretty)
+            print json.dumps(schema.to_json(), sort_keys=True, indent=opts.pretty)  # I know, it's silly
+    elif not opts.dest and not opts.schema:
+        print json.dumps(head_avro(opts.avro, opts.num), indent=opts.pretty)
     else:
-        write_avro(dest, num, avro)
+        write_avro(opts.dest, opts.num, opts.avro)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
