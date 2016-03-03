@@ -21,6 +21,7 @@ def show_help():
     print "The -f option has to be present, if you do not give me a number(-n)"
     print "I will take 5!"
     print "You can add the -s option to only receive the schema in JSON"
+    print "If you want the JSON to be printed pretty, add the -i switch"
     print "You can add a '-d /path/to/newfile.avro' to redirect the output to a new avro file"
 
 
@@ -50,13 +51,15 @@ def main(argv):
     avro = False
     dest = False
     schema = False
+    pretty = False
     num = 5
     try:
-        opts, args = getopt.getopt(argv, 'f:n:d:')
+        opts, args = getopt.getopt(argv, 'f:n:d:si')
     except getopt.GetoptError as err:
         show_help()
         sys.exit(2)
     for o, a in opts:
+        # print "{0} ===> {1}".format(o, a) # DEBUG vars
         if o == "-f":
             avro = a
         elif o == "-d":
@@ -65,6 +68,8 @@ def main(argv):
             num = a
         elif o == "-s":
             schema = True
+        elif o == "-i":
+            pretty = True
         else:
             print "I am going to ignore option {0} you've set to {1}".format(o, a)
 
@@ -74,9 +79,10 @@ def main(argv):
         sys.exit(2)
 
     if not dest and schema:
-        print json.dumps(get_schema(avro), indent=True)
+        schema = get_schema(avro)
+        print schema.to_json()
     elif not dest and not schema:
-        print json.dumps(head_avro(avro, num), indent=True)
+        print json.dumps(head_avro(avro, num), indent=pretty)
     else:
         write_avro(dest, num, avro)
 
