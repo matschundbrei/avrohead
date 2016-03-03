@@ -16,9 +16,9 @@ from avro.io import DatumReader, DatumWriter
 
 def show_help():
     "well, this'll show the help, alright!"
-    print "Use this like ..."
-    print "python {0} -n 4711 -f /path/to/somefile.avro".format(os.path.basename(__file__))
-    print "The -f option has to be present, if you do not give me a number(-n)"
+    print "Usage:"
+    print "\tpython {0} -n 4711 -f /path/to/somefile.avro".format(os.path.basename(__file__))
+    print "\nThe -f option has to be present, if you do not give me a number(-n)"
     print "I will take 5!"
     print "You can add the -s option to only receive the schema in JSON"
     print "If you want the JSON to be printed pretty, add the -i switch"
@@ -48,10 +48,10 @@ def write_avro(f, n, s):
 
 def main(argv):
     "main foo happening here, alright!"
-    avro = False
-    dest = False
-    schema = False
-    pretty = False
+    avro = None
+    dest = None
+    schema = None
+    pretty = None
     num = 5
     try:
         opts, args = getopt.getopt(argv, 'f:n:d:si')
@@ -80,7 +80,10 @@ def main(argv):
 
     if not dest and schema:
         schema = get_schema(avro)
-        print schema.to_json()
+        if not pretty:
+            print schema.to_json()
+        else:
+            print json.dumps(schema.to_json(), sort_keys=True, indent=pretty)  # I know, it's silly
     elif not dest and not schema:
         print json.dumps(head_avro(avro, num), indent=pretty)
     else:
