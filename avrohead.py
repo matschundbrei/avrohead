@@ -35,6 +35,17 @@ def write_avro(f, n, s):
             writer.append(line)
 
 
+def search_avro(f, n, t):
+    "will search n occurances of searchterm t in file f"
+    (field, value) = t.split(":", 1)
+    with DataFileReader(open(f, "r"), DatumReader()) as avrofeed:
+        schema = avrofeed.datum_reader.writers_schema
+        if field in schema.fields_dict:
+#            TODO: does not yield pure dict!!!
+        else:
+            raise NameError("Cannot find {0} in schema for {1}".format(field, f))
+
+
 def main():
     "main foo happening here, alright!"
     usage = "%prog [Options]"
@@ -46,6 +57,8 @@ def main():
                       help="indent [and keysort, if schema] any JSON on the output")
     parser.add_option("-n", "--number", dest="num", type="int", default=5, help="integer number of lines to put out")
     parser.add_option("-d", "--destination", dest="dest", help="optional destination file to write to")
+    parser.add_option("-g", "--search", dest="search", help="search for a specific field with a specific value",
+                      metavar="\"field:value\"")
     (opts, arg) = parser.parse_args()
 
     if not opts.avro:
@@ -60,7 +73,10 @@ def main():
         else:
             print json.dumps(schema.to_json(), sort_keys=True, indent=opts.pretty)  # I know, it's silly
     elif not opts.dest and not opts.schema:
-        print json.dumps(head_avro(opts.avro, opts.num), indent=opts.pretty)
+        if not opts.search:
+            print json.dumps(head_avro(opts.avro, opts.num), indent=opts.pretty)
+        else:
+            print json.dumps(search_avro(opts.avro, opts.num, opts.search), indent=opts.pretty)
     else:
         write_avro(opts.dest, opts.num, opts.avro)
 
