@@ -18,7 +18,10 @@ def show_help():
     "well, this'll show the help, alright!"
     print "Use this like ..."
     print "python {0} -n 4711 -f /path/to/somefile.avro".format(os.path.basename(__file__))
-    print "you can add a '-d /path/to/newfile.avro' to redirect the output to a new avro file"
+    print "The -f option has to be present, if you do not give me a number(-n)"
+    print "I will take 5!"
+    print "You can add the -s option to only receive the schema in JSON"
+    print "You can add a '-d /path/to/newfile.avro' to redirect the output to a new avro file"
 
 
 def get_schema(f):
@@ -46,6 +49,7 @@ def main(argv):
     "main foo happening here, alright!"
     avro = False
     dest = False
+    schema = False
     num = 5
     try:
         opts, args = getopt.getopt(argv, 'f:n:d:')
@@ -59,15 +63,19 @@ def main(argv):
             dest = a
         elif o == "-n":
             num = a
+        elif o == "-s":
+            schema = True
         else:
-            print "I am not sure what to do with option {0} you set to {1}".format(o, a)
+            print "I am going to ignore option {0} you've set to {1}".format(o, a)
 
     if not avro:
         print "We at least need a file, ok?"
         show_help()
         sys.exit(2)
 
-    if not dest:
+    if not dest and schema:
+        print json.dumps(get_schema(avro), indent=True)
+    elif not dest and not schema:
         print json.dumps(head_avro(avro, num), indent=True)
     else:
         write_avro(dest, num, avro)
