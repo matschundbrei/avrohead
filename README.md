@@ -15,7 +15,10 @@ You call this script with an optional number (`-n`) and a filename (`-f`) and yo
 
 You can also redirect the output to another Avro file with the `-d` switch.
 
+For convenience I've added a switch to pretty-print JSON (`-i`) and one to only extract the schema from the file (`-s`)
+
 Example:
+
 `python avrohead.py -n 42 -f /path/to/my/file.avro`
 
 License
